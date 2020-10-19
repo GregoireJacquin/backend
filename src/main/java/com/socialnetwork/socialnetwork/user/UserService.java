@@ -8,16 +8,17 @@ public class UserService {
 
     UserRepository userRepository;
 
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository) {
+        super();
         this.userRepository = userRepository;
-        bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public User save(User user){
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    public User save(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
-
     }
+
 }
