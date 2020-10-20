@@ -3,10 +3,12 @@ package com.socialnetwork.socialnetwork;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.socialnetwork.socialnetwork.error.ApiError;
 import com.socialnetwork.socialnetwork.shared.GenericResponse;
 import com.socialnetwork.socialnetwork.user.User;
 import com.socialnetwork.socialnetwork.user.UserRepository;
@@ -164,6 +166,38 @@ public class UserControllerTest {
         user.setPassword("123456789");
         ResponseEntity<Object> response = postSignup(user, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+    @Test
+    public void postUser_whenUserIsInvalid_receiveApiError(){
+        User user = new User();
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+        assertThat(response.getBody().getUrl()).isEqualTo(API_1_0_USERS);
+
+    }
+    @Test
+    public void postUser_whenUserIsInvalid_receiveApiErrorWithValidationError (){
+        User user = new User();
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+        assertThat(response.getBody().getValidationErrors()).size().isEqualTo(3);
+
+    }
+    @Test
+    public void postUser_whenUserHasNullUsernanme_receiveMessageDefaultorUsername(){
+        User user = createValidUser();
+        user.setUsername(null);
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+        Map<String,String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("Username ne doit pas etre nul");
+
+    }
+    @Test
+    public void postUser_whenUserHasNullPassword_receiveMessageDefaultorPassword(){
+        User user = createValidUser();
+        user.setPassword(null);
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+        Map<String,String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("password")).isEqualTo("ne peut pas etre nul");
+
     }
     public <T> ResponseEntity<T> postSignup(Object request, Class<T> response){
         return testRestTemplate.postForEntity(API_1_0_USERS, request, response);

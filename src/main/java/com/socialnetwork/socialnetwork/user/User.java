@@ -17,7 +17,7 @@ public class User {
     @GeneratedValue
     private long id;
 
-    @NotNull
+    @NotNull(message = "{socialnetwork.constraints.username.NotNull.message}")
     @Size(min = 4, max = 255)
     private String username;
 
